@@ -1,0 +1,1084 @@
+import random
+
+statmin = 60
+
+classes = {
+    1: "Barbarian",
+    2: "Bard",
+    3: "Cleric",
+    4: "Druid",
+    5: "Fighter",
+    6: "Monk",
+    7: "Paladin",
+    8: "Ranger",
+    9: "Rogue",
+    10: "Sorcerer",
+    11: "Warlock",
+    12: "Wizard"
+}
+ancestries = {
+    1: "Mountain Dwarf",
+    2: "Hill Dwarf",
+    3: "High Elf",
+    4: "Wood Elf",
+    5: "Drow",
+    6: "Lightfoot Halfling",
+    7: "Stout Halfling",
+    8: "Human",
+    9: "Dragonborn",
+    10: "Forest Gnome",
+    11: "Rock Gnome",
+    12: "Half-Elf",
+    13: "Half-Orc",
+    14: "Tiefling"
+}
+ancestrystats = {
+    1: [2, 0, 2, 0, 0, 0, 0, 0],
+    2: [0, 0, 2, 0, 1, 0, 0, 0],
+    3: [0, 2, 0, 1, 0, 0, 0, 0],
+    4: [0, 2, 0, 0, 1, 0, 0, 0],
+    5: [0, 2, 0, 0, 0, 1, 0, 0],
+    6: [0, 2, 0, 0, 0, 1, 0, 0],
+    7: [0, 2, 1, 0, 0, 0, 0, 0],
+    8: [1, 1, 1, 1, 1, 1, 0, 0],
+    9: [2, 0, 0, 0, 0, 1, 0, 0],
+    10: [0, 1, 0, 2, 0, 0, 0, 0],
+    11: [0, 0, 1, 2, 0, 0, 0, 0],
+    12: [0, 0, 0, 0, 0, 2, 1, 1],
+    13: [2, 0, 1, 0, 0, 0, 0, 0],
+    14: [0, 0, 0, 1, 0, 2, 0, 0],
+}
+allstats = {
+    0: "STR",
+    1: "DEX",
+    2: "CON",
+    3: "INT",
+    4: "WIS",
+    5: "CHA"
+}
+
+
+def dndancest():
+    global ancestries
+    print("What ancestry do you want to play?")
+    print(ancestries)
+    print("Or 0 for a random ancestry")
+    anc_input = 1
+    while anc_input > 0:
+        anc_num = input()
+        if anc_num.isdigit():
+            if int(anc_num) >= 0 and int(anc_num) <= len(ancestries):
+                if int(anc_num) == 0:
+                    anc_num = random.randint(1, len(ancestries))
+                anc_input = 0
+
+            else:
+                print("Invalid selection. Enter a number between 0 %s" % len(ancestries))
+        else:
+            print("Invalid selection. Enter a number between 0 and %s" % len(ancestries))
+    return anc_num
+
+
+def dndclass():
+    global classes
+    print("What class you you want to play?")
+    print(classes)
+    print("Or 0 for a random class")
+    class_input = 1
+    while class_input > 0:
+        class_num = input()
+        if class_num.isdigit():
+            if int(class_num) >= 0 and int(class_num) <= len(classes):
+                if int(class_num) == 0:
+                    class_num = random.randint(1, len(classes))
+                class_input = 0
+                class_name = classes[int(class_num)]
+            else:
+                print("Invalid selection. Enter a number between 0 and %s" % len(classes))
+        else:
+            print("Invalid selection. Enter a number between 0 and %s" % len(classes))
+    return class_num
+
+
+def dndstatroll(minimum):
+    again = 1
+    while again > 0:
+        array = []
+        for j in range(6):
+            values = []
+            for i in range(4):
+                values.append(random.randint(1, 6))
+            values.remove(min(values))
+            stat = sum(values)
+            array.append(stat)
+        array.sort(reverse=True)
+        if sum(array) >= minimum:
+            again = 0
+    return array
+
+
+def dndmanualstat(array):
+    global allstats
+    stats = {
+        "STR": 0,
+        "DEX": 0,
+        "CON": 0,
+        "INT": 0,
+        "WIS": 0,
+        "CHA": 0
+    }
+    array_work = array.copy()
+    for i in range(6):
+        check = 1
+        while check > 0:
+            print("Alright your array is: %s" % array_work)
+            print("What value do you want to assign to %s?" % allstats[i])
+            assign = input()
+            if assign.isdigit():
+                if int(assign) in array_work:
+                    stats[allstats[i]] = int(assign)
+                    array_work.remove(int(assign))
+                    check = 0
+                else:
+                    print("That's not valid. Enter a value that is still in your array")
+            else:
+                print("That's not valid. Enter a value that is still in your array")
+    return (stats)
+
+
+def dndrandomstats(array):
+    global allstats
+    stats = {
+        "STR": 0,
+        "DEX": 0,
+        "CON": 0,
+        "INT": 0,
+        "WIS": 0,
+        "CHA": 0
+    }
+    array_work = array.copy()
+    for i in range(6):
+        roll = random.randint(0, len(array_work) - 1)
+        stats[allstats[i]] = array_work[roll]
+        array_work.remove(array_work[roll])
+    return (stats)
+
+
+def dndautomatedstat(array, classnum):
+    global allstats
+    stats = {
+        "STR": 0,
+        "DEX": 0,
+        "CON": 0,
+        "INT": 0,
+        "WIS": 0,
+        "CHA": 0
+    }
+    array_work = array.copy()
+    if classnum == 1:
+        stats["STR"] = max(array_work)
+        array_work.remove(max(array_work))
+        stats["CON"] = max(array_work)
+        array_work.remove(max(array_work))
+        stats["DEX"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Would you rather have Wisdom (WIS), Intelligence (INT), or Charisma (CHA)?")
+            statchoice1 = input()
+            if statchoice1.upper() == "WIS" or statchoice1.upper() == "W" or statchoice1.upper() == "WISDOM":
+                stats["WIS"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Right, and do you want higher Intelligence (INT) or Charisma (CHA)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "CHA" or statchoice2.upper() == "C" or statchoice2.upper() == "CHARISMA":
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "INT" or statchoice1.upper() == "I" or statchoice1.upper() == "INTELLIGENCE":
+                stats["INT"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Right, and do you want higher Wisdom (WIS) or Charisma (CHA)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "WIS" or statchoice2.upper() == "W" or statchoice2.upper() == "WISDOM":
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "CHA" or statchoice2.upper() == "C" or statchoice2.upper() == "CHARISMA":
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "CHA" or statchoice1.upper() == "C" or statchoice1.upper() == "CHARISMA":
+                stats["CHA"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Right, and do you want higher Wisdom (WIS) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "WIS" or statchoice2.upper() == "W" or statchoice2.upper() == "WISDOM":
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            else:
+                print("Invalid Input")
+    elif classnum == 2:
+        stats["CHA"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Would you rather fight (F) or think (T)?")
+            statchoice1 = input()
+            if statchoice1.upper() == "F" or statchoice1.upper() == "FIGHT":
+                stats["DEX"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["CON"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Right, and do you want higher Wisdom (WIS) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "WIS" or statchoice2.upper() == "W" or statchoice2.upper() == "WISDOM":
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "T" or statchoice1.upper() == "THINK":
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Right, and do you want higher Wisdom (WIS) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "WIS" or statchoice2.upper() == "W" or statchoice2.upper() == "WISDOM":
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            else:
+                print("Invalid Input")
+    elif classnum == 3:
+        stats["WIS"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Do you want to be on the frontlines (F) or support from the back (B)?")
+            statchoice1 = input()
+            if statchoice1.upper() == "F" or statchoice1.upper() == "FRONTLINES":
+                stats["CON"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["STR"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Right, and do you want higher Charisma (CHA) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "CHA" or statchoice2.upper() == "C" or statchoice2.upper() == "CHARISMA":
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "B" or statchoice1.upper() == "BACK":
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Right, and do you want higher Charisma (CHA) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "CHA" or statchoice2.upper() == "C" or statchoice2.upper() == "CHARISMA":
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            else:
+                print("Invalid Input")
+    elif classnum == 4:
+        stats["WIS"] = max(array_work)
+        array_work.remove(max(array_work))
+        stats["CON"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Are you a sage (S) or a warden (W)?")
+            statchoice1 = input()
+            if statchoice1.upper() == "S" or statchoice1.upper() == "SAGE":
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Right, and do you want higher Charisma (CHA) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "CHA" or statchoice2.upper() == "C" or statchoice2.upper() == "CHARISMA":
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "W" or statchoice1.upper() == "WARDEN":
+                stats["DEX"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Right, and do you want higher Charisma (CHA) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "CHA" or statchoice2.upper() == "C" or statchoice2.upper() == "CHARISMA":
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            else:
+                print("Invalid Input")
+    elif classnum == 5:
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Do you fight with speed (S) or power (P)?")
+            statchoice1 = input()
+            if statchoice1.upper() == "S" or statchoice1.upper() == "SPEED":
+                stats["DEX"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["CON"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want to blend magic with your fighting skills? Y/N")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "Y" or statchoice2.upper() == "YES":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "N" or statchoice2.upper() == "NO":
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "P" or statchoice1.upper() == "POWER":
+                stats["STR"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["CON"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want to blend magic with your fighting skills? Y/N")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "Y" or statchoice2.upper() == "YES":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "N" or statchoice2.upper() == "NO":
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            else:
+                print("Invalid Input")
+    elif classnum == 6:
+        stats["DEX"] = max(array_work)
+        array_work.remove(max(array_work))
+        stats["WIS"] = max(array_work)
+        array_work.remove(max(array_work))
+        stats["CON"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Do you want higher Charisma (CHA) or Intelligence (INT)?")
+            statchoice1 = input()
+            if statchoice1.upper() == "CHA" or statchoice1.upper() == "C" or statchoice1.upper() == "CHARISMA":
+                stats["CHA"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["STR"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["INT"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck1 = 0
+            elif statchoice1.upper() == "INT" or statchoice1.upper() == "I" or statchoice1.upper() == "INTELLIGENCE":
+                stats["INT"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["STR"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["CHA"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck1 = 0
+            else:
+                print("Invalid Input")
+    elif classnum == 7:
+        stats["STR"] = max(array_work)
+        array_work.remove(max(array_work))
+        stats["CHA"] = max(array_work)
+        array_work.remove(max(array_work))
+        stats["CON"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Do you want higher Wisdom (WIS) or Intelligence (INT)?")
+            statchoice1 = input()
+            if statchoice1.upper() == "WIS" or statchoice1.upper() == "W" or statchoice1.upper() == "WISDOM":
+                stats["WIS"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["DEX"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["INT"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck1 = 0
+            elif statchoice1.upper() == "INT" or statchoice1.upper() == "I" or statchoice1.upper() == "INTELLIGENCE":
+                stats["INT"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["DEX"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["WIS"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck1 = 0
+            else:
+                print("Invalid Input")
+    elif classnum == 8:
+        stats["DEX"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Do you primarily use melee (M) or ranged (R) weapons?")
+            statchoice1 = input()
+            if statchoice1.upper() == "M" or statchoice1.upper() == "Melee":
+                stats["CON"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["WIS"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["STR"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want higher Charisma (CHA) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "CHA" or statchoice2.upper() == "C" or statchoice2.upper() == "CHARISMA":
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "R" or statchoice1.upper() == "RANGED":
+                stats["WIS"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["CON"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want higher Charisma (CHA) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "CHA" or statchoice2.upper() == "C" or statchoice2.upper() == "CHARISMA":
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            else:
+                print("Invalid Input")
+    elif classnum == 9:
+        stats["DEX"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Do you have an interest in magic? Y/N")
+            statchoice1 = input()
+            if statchoice1.upper() == "Y" or statchoice1.upper() == "YES":
+                stats["INT"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want higher Charisma (CHA) or Wisdom (WIS)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "CHA" or statchoice2.upper() == "C" or statchoice2.upper() == "CHARISMA":
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "WIS" or statchoice2.upper() == "W" or statchoice2.upper() == "WISDOM":
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "N" or statchoice1.upper() == "NO":
+                stats["WIS"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want higher Charisma (CHA) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "CHA" or statchoice2.upper() == "C" or statchoice2.upper() == "CHARISMA":
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            else:
+                print("Invalid Input")
+    elif classnum == 10:
+        stats["CHA"] = max(array_work)
+        array_work.remove(max(array_work))
+        stats["CON"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Do you want higher Intelligence (INT) or Wisdom (WIS)?")
+            statchoice1 = input()
+            if statchoice1.upper() == "INT" or statchoice1.upper() == "I" or statchoice1.upper() == "INTELLIGENCE":
+                stats["INT"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["DEX"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want higher Strength (STR) or Wisdom (WIS)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "STR" or statchoice2.upper() == "S" or statchoice2.upper() == "STRENGTH":
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "WIS" or statchoice2.upper() == "W" or statchoice2.upper() == "WISDOM":
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "WIS" or statchoice1.upper() == "W" or statchoice1.upper() == "WISDOM":
+                stats["WIS"] = max(array_work)
+                array_work.remove(max(array_work))
+                stats["DEX"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want higher Strength (STR) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "STR" or statchoice2.upper() == "S" or statchoice2.upper() == "STRENGTH":
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            else:
+                print("Invalid Input")
+    elif classnum == 11:
+        stats["CHA"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Would you rather focus on fighting (F) or thinking (T)?")
+            statchoice1 = input()
+            if statchoice1.upper() == "FIGHTING" or statchoice1.upper() == "F":
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Fight with Strength (STR) or Dexterity (DEX)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "STR" or statchoice2.upper() == "S" or statchoice2.upper() == "STRENGTH":
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "DEX" or statchoice2.upper() == "D" or statchoice2.upper() == "DEXTERITY":
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "THINKING" or statchoice1.upper() == "T":
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want higher Wisdom (WIS) or Intelligence (INT)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "WIS" or statchoice2.upper() == "W" or statchoice2.upper() == "WISDOM":
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "INT" or statchoice2.upper() == "I" or statchoice2.upper() == "INTELLIGENCE":
+                        stats["INT"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            else:
+                print("Invalid Input")
+    elif classnum == 12:
+        stats["INT"] = max(array_work)
+        array_work.remove(max(array_work))
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Do you want higher Charisma (CHA) or Wisdom (WIS)?")
+            statchoice1 = input()
+            if statchoice1.upper() == "CHA" or statchoice1.upper() == "C" or statchoice1.upper() == "CHARISMA":
+                stats["CHA"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want higher Dexterity (DEX) or Constitution (CON)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "DEX" or statchoice2.upper() == "D" or statchoice2.upper() == "DEXTERITY":
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "CON" or statchoice2.upper() == "C" or statchoice2.upper() == "CONSTITUTION":
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["WIS"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            elif statchoice1.upper() == "WIS" or statchoice1.upper() == "W" or statchoice1.upper() == "WISDOM":
+                stats["WIS"] = max(array_work)
+                array_work.remove(max(array_work))
+                statcheck2 = 1
+                while statcheck2 > 0:
+                    print("Do you want higher Dexterity (DEX) or Constitution (CON)?")
+                    statchoice2 = input()
+                    if statchoice2.upper() == "DEX" or statchoice2.upper() == "D" or statchoice2.upper() == "DEXTERITY":
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    elif statchoice2.upper() == "CON" or statchoice2.upper() == "C" or statchoice2.upper() == "CONSTITUTION":
+                        stats["CON"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["DEX"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["CHA"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        stats["STR"] = max(array_work)
+                        array_work.remove(max(array_work))
+                        statcheck1 = 0
+                        statcheck2 = 0
+                    else:
+                        print("Invalid Input")
+            else:
+                print("Invalid Input")
+    return (stats)
+
+
+def dndstatassign(array, classnum):
+    assigninput = 1
+    while assigninput > 0:
+        print("Do you want to manually (M) assign your stats, randomly (R) assign them, or automate (A) it? M/R/A")
+        assignchoice = input()
+        if assignchoice.upper() == "M" or assignchoice.upper() == "MANUAL":
+            stats = dndmanualstat(array)
+            print(stats)
+            assigninput2 = 1
+            while assigninput2 > 0:
+                print("Are you happy with this stat assignment? Y/N")
+                statconfirm = input()
+                if statconfirm == "Y" or statconfirm == "YES":
+                    assigninput = 0
+                    assigninput2 = 0
+                elif statconfirm == "N" or statconfirm == "NO":
+                    assigninput2 = 0
+                    print("Alright, then lets try again!")
+                else:
+                    print("Invalid Input. Enter Y if you are happy with your stat assignment and N to assign them "
+                          "differently")
+        elif assignchoice.upper() == "A" or assignchoice.upper() == "AUTOMATE":
+            stats = dndautomatedstat(array, classnum)
+            print(stats)
+            assigninput2 = 1
+            while assigninput2 > 0:
+                print("Are you happy with this stat assignment? Y/N")
+                statconfirm = input()
+                if statconfirm == "Y" or statconfirm == "YES":
+                    assigninput = 0
+                    assigninput2 = 0
+                elif statconfirm == "N" or statconfirm == "NO":
+                    assigninput2 = 0
+                    print("Alright, then lets try again!")
+                else:
+                    print("Invalid Input. Enter Y if you are happy with your stat assignment and N to assign them "
+                          "differently")
+        elif assignchoice.upper() == "R" or assignchoice.upper() == "RANDOM":
+            stats = dndrandomstats(array)
+            print(stats)
+            assigninput2 = 1
+            while assigninput2 > 0:
+                print("Are you happy with this stat assignment? Y/N")
+                statconfirm = input()
+                if statconfirm == "Y" or statconfirm == "YES":
+                    assigninput = 0
+                    assigninput2 = 0
+                elif statconfirm == "N" or statconfirm == "NO":
+                    assigninput2 = 0
+                    print("Alright, then lets try again!")
+                else:
+                    print("Invalid Input. Enter Y if you are happy with your stat assignment and N to assign them "
+                          "differently")
+        else:
+            print("Invalid Input. Enter M for manual stat assignment, R for random, or A for automated")
+    print("Here is your final stat assignment:")
+    return (stats)
+
+
+def dndanceststat(stats, ancnum):
+    global ancestrystats, allstats
+    new_stats = stats.copy()
+    for i in range(6):
+        new_stats[allstats[i]] += ancestrystats[ancnum][i]
+        if ancestrystats[ancnum][i] > 0:
+            print("Your %s has been increased by %s due to your ancestry." % (allstats[i], ancestrystats[ancnum][i]))
+    if ancestrystats[ancnum][6] > 0:
+        print()
+        print("Your ancestry allows you to add %s to a stat of your choice that has not already been increased." % ancestrystats[ancnum][6])
+        statcheck1 = 1
+        while statcheck1 > 0:
+            print("Key in the corresponding number to choose:")
+            print("Strength: 1, Dexterity: 2, Constitution: 3, Intelligence: 4, Wisdom: 5, Charisma: 6")
+            statchoice1 = input()
+            if statchoice1.isdigit():
+                if 0 < int(statchoice1) <= 6 and ancestrystats[ancnum][int(statchoice1) - 1] > 0:
+                    print("You cannot increase a stat a second time.")
+                elif 0 < int(statchoice1) <= 6:
+                    new_stats[allstats[int(statchoice1) - 1]] += ancestrystats[ancnum][6]
+                    if ancestrystats[ancnum][7] > 0:
+                        print()
+                        print("Your ancestry allows you to add %s to another stat of your choice that has not already been increased." % ancestrystats[ancnum][7])
+                        statcheck2 = 1
+                        while statcheck2 > 0:
+                            print("Key in the corresponding number to choose:")
+                            print("Strength: 1, Dexterity: 2, Constitution: 3, Intelligence: 4, Wisdom: 5, Charisma: 6")
+                            statchoice2 = input()
+                            if statchoice2.isdigit():
+                                if 0 < int(statchoice1) <= 6 and statchoice2 == statchoice1 or ancestrystats[ancnum][int(statchoice2) - 1] > 0:
+                                    print("You cannot increase a stat a second time.")
+                                elif 0 < int(statchoice2) <= 6:
+                                    new_stats[allstats[int(statchoice2) - 1]] += ancestrystats[ancnum][7]
+                                    statcheck1 = 0
+                                    statcheck2 = 0
+                                else:
+                                    print("Invalid selection. Enter a number between 1 and 6.")
+                            else:
+                                print("Invalid selection. Enter a number between 1 and 6.")
+                    else:
+                        statchoice1 = 0
+                else:
+                    print("Invalid selection. Enter a number between 1 and 6.")
+            else:
+                print("Invalid selection. Enter a number between 1 and 6.")
+    return new_stats
+
+
+def dndchar():
+    global ancestries, classes
+    ancnum = dndancest()
+    classnum = dndclass()
+    ancname = ancestries[int(ancnum)]
+    classname = classes[int(classnum)]
+    print()
+    print("Alright you are a %s %s!" % (ancname, classname))
+    print()
+    statinput = 1
+    while statinput > 0:
+        print("Do you want to take a standard array of stats (S) or roll for them (R)? S/R")
+        statchoice = input()
+        if statchoice.upper() == "S" or statchoice.upper() == "STANDARD" or statchoice.upper() == "STANDARD ARRAY":
+            statarray = [15, 14, 13, 12, 10, 8]
+            statinput = 0
+        elif statchoice.upper() == "R" or statchoice.upper() == "ROLL":
+            statarray = dndstatroll(statmin)
+            statinput = 0
+        else:
+            print("Invalid Input. Enter S to take the standard array or R to roll for them")
+    print("Here's your stat array: %s" % statarray)
+
+    stats = dndstatassign(statarray, classnum)
+
+    stats = dndanceststat(stats,ancnum)
+    print()
+    print("Here is your character:")
+    print("A %s %s with:" % (ancname, classname))
+    print(stats)
+
+dndchar()
