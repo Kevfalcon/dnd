@@ -1,0 +1,446 @@
+import random
+from pprint import pprint
+
+# Set the minimum total of stats when they are rolled
+statmin = 60
+
+# Define the list of classes, and set up the logic for automated stat assignment
+classes = {
+    "Barbarian": ["Would you rather have Wisdom (1), Intelligence (2), or Charisma (3)? 123",
+                  ["Right, and do you want higher Intelligence (1) or Charisma (2)? 12",
+                   "Right, and do you want higher Wisdom (1) or Charisma (2)? 12",
+                   "Right, and do you want higher Wisdom (1) or Intelligence (2)? 12"],
+                  [["STR", "STR"], ["STR", "STR"], ["STR", "STR"]],
+                  [["CON", "CON"], ["CON", "CON"], ["CON", "CON"]],
+                  [["DEX", "DEX"], ["DEX", "DEX"], ["DEX", "DEX"]],
+                  [["WIS", "WIS"], ["INT", "INT"], ["CHA", "CHA"]],
+                  [["INT", "CHA"], ["WIS", "CHA"], ["WIS", "INT"]],
+                  [["CHA", "INT"], ["CHA", "WIS"], ["INT", "WIS"]]],
+    "Bard": ["Would you rather fight (1) or think (2)? 12",
+             ["Right, and do you want higher Wisdom (1) or Intelligence (2)? 12",
+              "Right, and do you want higher Wisdom (1) or Intelligence (2)? 12"],
+             [["CHA", "CHA"], ["CHA", "CHA"]],
+             [["DEX", "DEX"], ["WIS", "INT"]],
+             [["CON", "CON"], ["DEX", "DEX"]],
+             [["WIS", "INT"], ["CON", "CON"]],
+             [["INT", "WIS"], ["INT", "WIS"]],
+             [["STR", "STR"], ["STR", "STR"]]],
+    "Cleric": ["Do you want to be on the frontlines (1) or support from the back (2)? 12",
+               ["Right, and do you want higher Charisma (1) or Intelligence (2)? 12",
+                "Right, and do you want higher Charisma (1) or Intelligence (2)? 12"],
+               [["WIS", "WIS"], ["WIS", "WIS"]],
+               [["CON", "CON"], ["CHA", "INT"]],
+               [["STR", "STR"], ["CON", "CON"]],
+               [["CHA", "INT"], ["DEX", "DEX"]],
+               [["DEX", "DEX"], ["STR", "STR"]],
+               [["INT", "CHA"], ["INT", "CHA"]]],
+    "Druid": ["Do you want to be on a support caster (1) or an offensive one (2)? 12",
+              ["Right, and do you want higher Charisma (1) or Intelligence (2)? 12",
+               "Right, and do you want higher Charisma (1) or Intelligence (2)? 12"],
+              [["WIS", "WIS"], ["WIS", "WIS"]],
+              [["CON", "CON"], ["CON", "CON"]],
+              [["CHA", "INT"], ["DEX", "DEX"]],
+              [["DEX", "DEX"], ["CHA", "INT"]],
+              [["STR", "STR"], ["STR", "STR"]],
+              [["INT", "CHA"], ["INT", "CHA"]]],
+    "Fighter": ["Do you fight with speed (1) or power (2)? 12",
+                ["Do you want to blend magic with your fighting skills, Yes (1) or No (2)? 12",
+                 "Do you want to blend magic with your fighting skills, Yes (1) or No (2)? 12"],
+                [["DEX", "DEX"], ["STR", "STR"]],
+                [["CON", "CON"], ["CON", "CON"]],
+                [["INT", "WIS"], ["INT", "WIS"]],
+                [["WIS", "CHA"], ["WIS", "CHA"]],
+                [["STR", "STR"], ["DEX", "DEX"]],
+                [["CHA", "INT"], ["CHA", "INT"]]],
+    "Monk": ["Do you want higher Charisma (1) or Intelligence (2)? 12",
+             "",
+             [["DEX", "DEX"], ["DEX", "DEX"]],
+             [["WIS", "WIS"], ["WIS", "WIS"]],
+             [["CON", "CON"], ["CON", "CON"]],
+             [["CHA", "CHA"], ["INT", "INT"]],
+             [["STR", "STR"], ["STR", "STR"]],
+             [["INT", "INT"], ["CHA", "CHA"]]],
+    "Paladin": ["Do you want higher Wisdom (1) or Intelligence (2)? 12",
+                "",
+                [["STR", "STR"], ["STR", "STR"]],
+                [["CHA", "CHA"], ["CHA", "CHA"]],
+                [["CON", "CON"], ["CON", "CON"]],
+                [["WIS", "WIS"], ["INT", "INT"]],
+                [["DEX", "DEX"], ["DEX", "DEX"]],
+                [["INT", "INT"], ["WIS", "WIS"]]],
+    "Ranger": ["Do you primarily use melee (1) or ranged (2) weapons? 12",
+               ["Do you want higher Charisma (1) or Intelligence (2)? 12",
+                "Do you want higher Charisma (1) or Intelligence (2)? 12"],
+               [["DEX", "DEX"], ["DEX", "DEX"]],
+               [["CON", "CON"], ["CON", "CON"]],
+               [["WIS", "WIS"], ["WIS", "WIS"]],
+               [["STR", "STR"], ["CHA", "INT"]],
+               [["CHA", "INT"], ["STR", "STR"]],
+               [["INT", "CHA"], ["INT", "CHA"]]],
+    "Rogue": ["Do you have an interest in magic, Yes (1) or No (2)? 12",
+              ["Do you want higher Charisma (1) or Wisdom (2)? 12",
+               "Do you want higher Charisma (1) or Intelligence (2)? 12"],
+              [["DEX", "DEX"], ["DEX", "DEX"]],
+              [["INT", "INT"], ["WIS", "WIS"]],
+              [["CHA", "WIS"], ["CHA", "INT"]],
+              [["CON", "CON"], ["CON", "CON"]],
+              [["WIS", "CHA"], ["INT", "CHA"]],
+              [["STR", "STR"], ["STR", "STR"]]],
+    "Sorcerer": ["Do you want higher Intelligence (1) or Wisdom (2)? 12",
+                 ["Do you want higher Strength (1) or Wisdom (2)? 12",
+                  "Do you want higher Strength (1) or Intelligence (2)? 12"],
+                 [["CHA", "CHA"], ["CHA", "CHA"]],
+                 [["CON", "CON"], ["CON", "CON"]],
+                 [["INT", "INT"], ["WIS", "WIS"]],
+                 [["DEX", "DEX"], ["DEX", "DEX"]],
+                 [["STR", "WIS"], ["STR", "INT"]],
+                 [["WIS", "STR"], ["INT", "STR"]]],
+    "Warlock": ["Would you rather focus on fighting (1) or thinking (2)? 12",
+                ["Fight with Strength (1) or Dexterity (2)? 12",
+                 "Do you want higher Wisdom (1) or Intelligence (2)? 12"],
+                [["CHA", "CHA"], ["CHA", "CHA"]],
+                [["STR", "DEX"], ["WIS", "INT"]],
+                [["CON", "CON"], ["DEX", "DEX"]],
+                [["DEX", "INT"], ["INT", "WIS"]],
+                [["INT", "WIS"], ["CON", "CON"]],
+                [["WIS", "STR"], ["STR", "STR"]]],
+    "Wizard": ["Do you want higher Charisma (1) or Wisdom (2)? 12",
+               ["Do you want higher Dexterity (1) or Constitution (2)? 12",
+                "Do you want higher Dexterity (1) or Constitution (2)? 12"],
+               [["INT", "INT"], ["INT", "INT"]],
+               [["CHA", "CHA"], ["WIS", "WIS"]],
+               [["DEX", "CON"], ["DEX", "CON"]],
+               [["CON", "DEX"], ["CON", "DEX"]],
+               [["WIS", "WIS"], ["CHA", "CHA"]],
+               [["STR", "STR"], ["STR", "STR"]]],
+}
+
+# Define the list of ancestries and their corresponding stat bonuses
+ancestries = {
+    "Mountain Dwarf": [2, 0, 2, 0, 0, 0, 0, 0],
+    "Hill Dwarf": [0, 0, 2, 0, 1, 0, 0, 0],
+    "High Elf": [0, 2, 0, 1, 0, 0, 0, 0],
+    "Wood Elf": [0, 2, 0, 0, 1, 0, 0, 0],
+    "Drow": [0, 2, 0, 0, 0, 1, 0, 0],
+    "Lightfoot Halfling": [0, 2, 0, 0, 0, 1, 0, 0],
+    "Stout Halfling": [0, 2, 1, 0, 0, 0, 0, 0],
+    "Human": [1, 1, 1, 1, 1, 1, 0, 0],
+    "Dragonborn": [2, 0, 0, 0, 0, 1, 0, 0],
+    "Forest Gnome": [0, 1, 0, 2, 0, 0, 0, 0],
+    "Rock Gnome": [0, 0, 1, 2, 0, 0, 0, 0],
+    "Half Elf": [0, 0, 0, 0, 0, 2, 1, 1],
+    "Half Orc": [2, 0, 1, 0, 0, 0, 0, 0],
+    "Tiefling": [0, 0, 0, 1, 0, 2, 0, 0],
+}
+
+# Define the list of statistics and a default array
+allstats = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
+stats = {
+    "STR": 0,
+    "DEX": 0,
+    "CON": 0,
+    "INT": 0,
+    "WIS": 0,
+    "CHA": 0
+}
+
+
+def dndancest():
+    global ancestries
+    # Take user input to select an ancestry
+    print("\nWhat ancestry do you want to play?")
+    pprint(list(ancestries.keys()))
+    print("Or type 'Random' for a random ancestry")
+    stop = False
+    while not stop:
+        anc_selection = input()
+        if anc_selection.upper() in (name.upper() for name in ancestries.keys()):
+            # If input matches an ancestry, assign it
+            anc_name = anc_selection.title()
+            stop = True
+        elif anc_selection.upper() == "RANDOM":
+            # If input is random, randomly assign an ancestry
+            anc_name = list(ancestries.keys())[random.randint(0, len(list(ancestries.keys())) - 1)]
+            stop = True
+        else:
+            print("Invalid selection. Enter the name of a ancestry from the list above or 'Random'.")
+    return anc_name
+
+
+def dndclass():
+    global classes
+    # Take user input to select a class
+    print("\nWhat class you you want to play?")
+    pprint(list(classes.keys()))
+    print("Or type 'Random' for a random class")
+    stop = False
+    while not stop:
+        class_selection = input()
+        if class_selection.upper() in (name.upper() for name in classes.keys()):
+            # If input matches a class, assign it
+            class_name = class_selection.title()
+            stop = True
+        elif class_selection.upper() == "RANDOM":
+            # If input is random, randomly assign a class
+            class_name = list(classes.keys())[random.randint(0, len(list(classes.keys())) - 1)]
+            stop = True
+        else:
+            print("Invalid selection. Enter the name of a class from the list above or 'Random'.")
+    return class_name
+
+
+def dndstatroll(minimum=0):
+    global allstats
+    # Roll to an array of values using the 4d6 drop the lowest method
+    stop = False
+    while not stop:
+        array = []
+        for j in range(len(allstats)):
+            values = []
+            for i in range(4):
+                values.append(random.randint(1, 6))
+            values.remove(min(values))
+            stat = sum(values)
+            array.append(stat)
+        array.sort(reverse=True)
+        if sum(array) >= minimum:
+            stop = True
+    return array
+
+
+def dndmanualstat(array):
+    global allstats, stats
+    # Manually assign the stat array with user input
+    array_work = array.copy()
+    for i in range(len(stats)):
+        stop = False
+        while not stop:
+            print("Alright your array is: %s" % array_work)
+            print("What value do you want to assign to %s?" % allstats[i])
+            assign = input()
+            if assign.isdigit():
+                if int(assign) in array_work:
+                    stats[allstats[i]] = int(assign)
+                    array_work.remove(int(assign))
+                    stop = True
+                else:
+                    print("That's not valid. Enter a value that is still in your array")
+            else:
+                print("That's not valid. Enter a value that is still in your array")
+    return (stats)
+
+
+def dndrandomstats(array):
+    global allstats, stats
+    # Randomly assign the stat array
+    array_work = array.copy()
+    for i in range(len(stats)):
+        roll = random.randint(0, len(array_work) - 1)
+        stats[allstats[i]] = array_work[roll]
+        array_work.remove(array_work[roll])
+    return (stats)
+
+
+def dndautomatedstat(array, classname):
+    global allstats, stats, classes
+    # Use recommended statistics logic to assign the stat array
+    array_work = array.copy()
+    classauto = classes[classname]
+    autochk1 = 0
+    autochk2 = 0
+    print("Answer the following with the numbers indicated:")
+    for i in range(len(classauto)):
+        # Set value for first automated stats user input
+        if i == 0 and len(classauto[i]) > 0:
+            autorequest = classauto[i][:classauto[i].find('?') + 1]
+            autoanswers = classauto[i][classauto[i].find('?') + 1:]
+            stop = False
+            while stop == False:
+                print(autorequest)
+                autoinput = input()
+                if autoinput in autoanswers and autoinput.isdigit() and len(autoinput) == 1:
+                    stop = True
+                    autochk1 = int(autoinput)
+                else:
+                    print("Invalid Input")
+        elif i == 1 and len(classauto[i]) > 0:
+            # Set value for second automated stats user input
+            autorequest = classauto[i][autochk1 - 1][:classauto[i][autochk1 - 1].find('?') + 1]
+            autoanswers = classauto[i][autochk1 - 1][classauto[i][autochk1 - 1].find('?') + 1:]
+            stop = False
+            while stop == False:
+                print(autorequest)
+                autoinput = input()
+                if autoinput in autoanswers and autoinput.isdigit() and len(autoinput) == 1:
+                    stop = True
+                    autochk2 = int(autoinput)
+                else:
+                    print("Invalid Input")
+        elif len(classauto[i]) == 0:
+            pass
+        else:
+            # Assign statistics based on recommendations and user input
+            if autochk2 > 0 and autochk1 > 0:
+                autovar = classauto[i][autochk1 - 1][autochk2 - 1]
+            elif autochk1 > 0:
+                autovar = classauto[i][autochk1 - 1][0]
+            else:
+                autovar = classauto[i][0][0]
+            stats[autovar] = max(array_work)
+            array_work.remove(max(array_work))
+    return stats
+
+
+def dndstatassign(array, classname):
+    stop = False
+    # Select method of stat assignment
+    while not stop:
+        print("\nDo you want to manually (M) assign your stats, randomly (R) assign them, or automate (A) it? M/R/A")
+        assignchoice = input()
+        if assignchoice.upper() == "M" or assignchoice.upper() == "MANUAL":
+            stats = dndmanualstat(array)
+            print(stats)
+            stop2 = False
+            while not stop2:
+                print("Are you happy with this stat assignment? Y/N")
+                statconfirm = input()
+                if statconfirm == "Y" or statconfirm == "YES":
+                    stop = True
+                    stop2 = True
+                elif statconfirm == "N" or statconfirm == "NO":
+                    stop2 = True
+                    print("Alright, then lets try again!")
+                else:
+                    print("Invalid Input. Enter Y if you are happy with your stat assignment or N to assign them "
+                          "differently")
+        elif assignchoice.upper() == "A" or assignchoice.upper() == "AUTOMATE":
+            stats = dndautomatedstat(array, classname)
+            print(stats)
+            stop2 = False
+            while not stop2:
+                print("Are you happy with this stat assignment? Y/N")
+                statconfirm = input()
+                if statconfirm == "Y" or statconfirm == "YES":
+                    stop = True
+                    stop2 = True
+                elif statconfirm == "N" or statconfirm == "NO":
+                    stop2 = True
+                    print("Alright, then lets try again!")
+                else:
+                    print("Invalid Input. Enter Y if you are happy with your stat assignment and N to assign them "
+                          "differently")
+        elif assignchoice.upper() == "R" or assignchoice.upper() == "RANDOM":
+            stats = dndrandomstats(array)
+            print(stats)
+            stop2 = False
+            while not stop2:
+                print("Are you happy with this stat assignment? Y/N")
+                statconfirm = input()
+                if statconfirm == "Y" or statconfirm == "YES":
+                    stop = True
+                    stop2 = True
+                elif statconfirm == "N" or statconfirm == "NO":
+                    stop2 = True
+                    print("Alright, then lets try again!")
+                else:
+                    print("Invalid Input. Enter Y if you are happy with your stat assignment and N to assign them "
+                          "differently")
+        else:
+            print("Invalid Input. Enter M for manual stat assignment, R for random, or A for automated")
+    return (stats)
+
+
+def dndanceststat(stats, ancname):
+    global ancestries, allstats
+    # Assign statistic bonuses from ancestry
+    new_stats = stats.copy()
+    for i in range(len(allstats)):
+        # Assign any fixed statistic bonuses
+        new_stats[allstats[i]] += ancestries[ancname][i]
+        if ancestries[ancname][i] > 0:
+            print("Your %s has been increased by %s due to your ancestry." % (allstats[i], ancestries[ancname][i]))
+    if ancestries[ancname][6] > 0:
+        # If chosen ancestry has any floating bonuses assign them
+        print()
+        print("Your ancestry allows you to add %s to a stat of your choice that has not already been increased." %
+              ancestries[ancname][6])
+        stop = False
+        while not stop:
+            print("Key in the corresponding number to choose:")
+            print("Strength: 1, Dexterity: 2, Constitution: 3, Intelligence: 4, Wisdom: 5, Charisma: 6")
+            statchoice1 = input()
+            if statchoice1.isdigit():
+                # Prevent a floating bonus being assigned to an already increased statistic
+                if 0 < int(statchoice1) <= 6 and ancestries[ancname][int(statchoice1) - 1] > 0:
+                    print("You cannot increase a stat a second time.")
+                elif 0 < int(statchoice1) <= 6:
+                    new_stats[allstats[int(statchoice1) - 1]] += ancestries[ancname][6]
+                    if ancestries[ancname][7] > 0:
+                        # Repeat for a second floating bonus if there is one
+                        print()
+                        print(
+                            "Your ancestry allows you to add %s to another stat of your choice that has not already been increased." %
+                            ancestries[ancname][7])
+                        stop2 = False
+                        while not stop2:
+                            print("Key in the corresponding number to choose:")
+                            print("Strength: 1, Dexterity: 2, Constitution: 3, Intelligence: 4, Wisdom: 5, Charisma: 6")
+                            statchoice2 = input()
+                            if statchoice2.isdigit():
+                                if 0 < int(statchoice1) <= 6 and (
+                                        statchoice2 == statchoice1 or ancestries[ancname][int(statchoice2) - 1] > 0):
+                                    print("You cannot increase a stat a second time.")
+                                elif 0 < int(statchoice2) <= 6:
+                                    new_stats[allstats[int(statchoice2) - 1]] += ancestries[ancname][7]
+                                    stop = True
+                                    stop2 = True
+                                else:
+                                    print("Invalid selection. Enter a number between 1 and 6.")
+                            else:
+                                print("Invalid selection. Enter a number between 1 and 6.")
+                    else:
+                        stop = True
+                else:
+                    print("Invalid selection. Enter a number between 1 and 6.")
+            else:
+                print("Invalid selection. Enter a number between 1 and 6.")
+    return new_stats
+
+
+def dndchar():
+    # Create a basic D&D character
+    # Choose ancestry
+    ancname = dndancest()
+    # Choose class
+    classname = dndclass()
+    print("\nAlright you are a %s %s!" % (ancname, classname))
+    # Choose a name
+    print("\nWhat is your name?")
+    name = input()
+    # Get a statistic array
+    stop = False
+    while not stop:
+        print("Do you want to take a standard array of stats (S) or roll for them (R)? S/R")
+        statchoice = input()
+        if statchoice.upper() == "S" or statchoice.upper() == "STANDARD" or statchoice.upper() == "STANDARD ARRAY":
+            statarray = [15, 14, 13, 12, 10, 8]
+            stop = True
+        elif statchoice.upper() == "R" or statchoice.upper() == "ROLL":
+            statarray = dndstatroll(statmin)
+            stop = True
+        else:
+            print("Invalid Input. Enter S to take the standard array or R to roll for them")
+    print("Here's your stat array: %s" % statarray)
+
+    # Assign stat array
+    stats = dndstatassign(statarray, classname)
+
+    # Add ancestry stat bonuses
+    stats = dndanceststat(stats, ancname)
+
+    print("\nHere is your character:")
+    print("%s, a %s %s with" % (name, ancname, classname))
+    print(stats)
+
+
+dndchar()
