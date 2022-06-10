@@ -1,0 +1,206 @@
+import random
+
+
+def dnddefinecombatant():
+    combatant = {}
+    # Name the combatant
+    print("What is the name of the combatant?")
+    name = input()
+    combatant["Name"] = name
+
+    # Set the combatant's Initiative modifier
+    print("\nWhat is the combatant's initiative bonus?")
+    initative = input()
+    stop = False
+    while stop == False:
+        if initative.isdigit():
+            combatant["Initiative"] = int(initative)
+            stop = True
+        elif initative[0] == "-" and initative[1:].isdigit():
+            combatant["Initiative"] = int(initative)
+            stop = True
+        else:
+            print("Invalid Input")
+
+    # Set the combatant's Hit Point maximum
+    print("\nWhat is the combatant's maximum hit points?")
+    hp = input()
+    stop = False
+    while stop == False:
+        if hp.isdigit():
+            combatant["Hit Points"] = int(hp)
+            stop = True
+        else:
+            print("Invalid Input")
+
+    # Set the combatant's Armour Class
+    print("\nWhat is the combatant's armour class?")
+    ac = input()
+    stop = False
+    while stop == False:
+        if ac.isdigit():
+            combatant["AC"] = int(ac)
+            stop = True
+        else:
+            print("Invalid Input")
+    # Define the combatant's attacks
+    attackmod = []
+    attackdamage = []
+    # First input how many attack they can make
+    print("\nHow many attacks can the combatant make?")
+    attacknumber = input()
+    stop = False
+    while stop == False:
+        if attacknumber.isdigit():
+
+            # For each attack set the attack roll modifier
+            for i in range(int(attacknumber)):
+                print("\nWhat is the attack bonus for attack number %s?" % (i + 1))
+                stop2 = False
+                while stop2 == False:
+                    attackbonus = input()
+                    if attackbonus.isdigit():
+                        attackmod.append(int(attackbonus))
+                        stop2 = True
+                    elif attackbonus[0] == "-" and attackbonus[1:].isdigit():
+                        attackmod.append(int(attackbonus))
+                        stop2 = True
+                    else:
+                        print("Invalid Input")
+
+                # Then for each attack set the damage roll
+                print("\nAnd what is the damage of attack number %s?" % (i + 1))
+                print("This damage value must be made up of either flat numbers or dice rolls in format XdY, "
+                      "each separated by a +.")
+                stop2 = False
+                while stop2 == False:
+                    attackdmg = input()
+                    attackdmgcheck = False
+                    attackdmgwork = attackdmg.split("+")
+                    for j in range(len(attackdmgwork)):
+                        if attackdmgwork[j].isdigit():
+                            pass
+                        else:
+                            attackdmgwork2 = attackdmgwork[j].split("d")
+                            for k in range(len(attackdmgwork2)):
+                                if attackdmgwork2[k].isdigit():
+                                    pass
+                                else:
+                                    attackdmgcheck = True
+                    if attackdmgcheck == False:
+                        attackdamage.append(attackdmg)
+                        stop2 = True
+                    else:
+                        print("Invalid Input")
+            stop = True
+        else:
+            print("Invalid Input")
+    combatant["Attack Modifier"] = attackmod
+    combatant["Attack Damage"] = attackdamage
+    return combatant
+
+
+def dnddamageroll(damage, critical):
+    # Divide the damage roll into types of dice and flat modifiers
+    # Note this cannot handle negative numbers
+    roll = damage.split("+")
+    totaldamage = 0
+    for i in range(len(roll)):
+        if roll[i].isdigit():
+            # Add flat modifiers to the total damage
+            totaldamage += int(roll[i])
+        elif roll[i].replace("d", "").isdigit() or roll[i].replace("D", "").isdigit():
+            if critical == 0:
+                # Roll dice and add the results to the total damage
+                rollcalc = roll[i].replace("D", "d").split("d")
+                for j in range(int(rollcalc[0])):
+                    totaldamage += random.randint(1, int(rollcalc[1]))
+            elif critical == 1:
+                # For critical hits roll  double the dice and add the results to the total damage
+                rollcalc = roll[i].replace("D", "d").split("d")
+                for j in range(int(rollcalc[0]) * 2):
+                    totaldamage += random.randint(1, int(rollcalc[1]))
+    return totaldamage
+
+
+def dndcombatsim(simnum):
+    combatants = []
+    # Combat simulation begins with setting the statistics of the two fighters
+    print("Before the simulation can begin, you must input the statistics of those fighting")
+    print("\nInput the statistics of the first combatant:")
+    combatants.append(dnddefinecombatant())
+    print("\nInput the statistics of the second combatant:")
+    combatants.append(dnddefinecombatant())
+    print("\nAlright the battle is between %s and %s!" % (combatants[0]["Name"], combatants[1]["Name"]))
+    wins = [0,0]
+    for interation in range(simnum):
+        currenthp = []
+        for i in range(len(combatants)):
+            currenthp.append(combatants[i]["Hit Points"])
+        # Initiative is rolled to determine who acts first
+        # A tie on the roll is broken by whoever has the higher initiative modifier
+        # If it is still  a tie initiative is rerolled
+        stop = False
+        while stop == False:
+            initative1 = random.randint(1, 20) + combatants[0]["Initiative"]
+            initative2 = random.randint(1, 20) + combatants[1]["Initiative"]
+            if initative1 > initative2:
+                initativeorder = [0, 1]
+                stop = True
+            elif initative2 > initative1:
+                initativeorder = [1, 0]
+                stop = True
+            else:
+                if combatants[0]["Initiative"] > combatants[1]["Initiative"]:
+                    initativeorder = [0, 1]
+                    stop = True
+                elif combatants[1]["Initiative"] > combatants[0]["Initiative"]:
+                    initativeorder = [1, 0]
+                    stop = True
+                else:
+                    pass
+        print("\n%s acts first!" % (combatants[initativeorder[0]]["Name"]))
+
+        combatstop = False
+        while combatstop == False:
+            print("\n%s has %s hit points remaining, while %s has %s hit points remaining" % (
+            combatants[0]["Name"], currenthp[0], combatants[1]["Name"], currenthp[1]))
+            for turn in range(len(initativeorder)):
+                print("\nIt is %s's turn" % (combatants[initativeorder[turn]]["Name"]))
+                for i in range(len(combatants[initativeorder[turn]]["Attack Modifier"])):
+                    if range(len(combatants[initativeorder[turn]]["Attack Modifier"])) == 0:
+                        print("%s makes their attack!" % (combatants[initativeorder[turn]]["Name"]))
+                    else:
+                        print("%s makes attack number %s!" % (combatants[initativeorder[turn]]["Name"], i + 1))
+                    attackroll = random.randint(1, 20)
+                    if attackroll == 20:
+                        damageroll = dnddamageroll(
+                            combatants[initativeorder[turn]]["Attack Damage"][i], 1)
+                        print("A critical hit! Dealing %s damage" % damageroll)
+                        currenthp[(initativeorder[turn] + 1) % 2] -= damageroll
+                        if currenthp[(initativeorder[turn] + 1) % 2] <= 0:
+                            combatstop = True
+                            winner = initativeorder[turn]
+                            break
+                    elif attackroll == 1:
+                        print("The attack misses")
+                    elif attackroll + combatants[initativeorder[turn]]["Attack Modifier"][i] >= \
+                            combatants[(initativeorder[turn] + 1) % 2]["AC"]:
+                        damageroll = dnddamageroll(
+                            combatants[initativeorder[turn]]["Attack Damage"][i], 0)
+                        print("The attack hits. Dealing %s damage" % damageroll)
+                        currenthp[(initativeorder[turn] + 1) % 2] -= damageroll
+                        if currenthp[(initativeorder[turn] + 1) % 2] <= 0:
+                            combatstop = True
+                            winner = initativeorder[turn]
+                            break
+                    else:
+                        print("The attack misses")
+                if combatstop:
+                    break
+        print(
+            "\n%s has been defeated. %s is triumphant!" % (combatants[(winner + 1) % 2]["Name"], combatants[winner]["Name"]))
+        wins[winner] +=1
+    print("After %s battles %s has won %s bouts while %s has won %s" %(simnum,combatants[0]["Name"],wins[0],combatants[1]["Name"],wins[1]))
+
+dndcombatsim(100)
